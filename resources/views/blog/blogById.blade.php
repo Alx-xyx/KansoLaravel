@@ -20,13 +20,10 @@
                 </time>
             </div>
         </header>
-        @if ($entrada->imagen)
+        @if ($entrada->imagen_url)
             <figure class="article-cover">
-                <img
-                    src="{{ asset('img/' . $entrada->imagen) }}"
-                    alt="{{ $entrada->titulo }}"
-                    class="article-image"
-                >
+                <img src="{{ $entrada->imagen_url }}" alt="{{ $entrada->imagen_descripcion ?: $entrada->titulo }}"
+                    class="article-image">
             </figure>
         @endif
         <div class="article-body">

@@ -44,6 +44,7 @@ class ProductoController extends Controller
             'descripcion' => ['required', 'min:5'],
             'precio' => ['required', 'numeric'],
             'stock' => ['required', 'numeric'],
+            'imagen'=>['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio para su muestra',
             'nombre.min' => 'El nombre del producto debe tener un minimo de :min caracteres',
@@ -53,6 +54,9 @@ class ProductoController extends Controller
             'precio.numeric' => 'El precio del producto debe de estar expresado en numeros',
             'stock.required' => 'El stock del producto es obligatorio para su muestra',
             'stock.numeric' => 'El stock del producto debe de estar expresado en numeros',
+            'image.image' => 'El archivo debe de ser una imagen',
+            'image.mimes' => 'La imagen debe ser JPG, PNG o WEBP',
+            'image.max' => 'La imagen no puede pesar mas de 2 MB',
         ]);
 
         $data = $request->only(['nombre', 'descripcion', 'precio', 'stock', 'imagen_descripcion', 'categoria_fk']);
@@ -86,6 +90,7 @@ class ProductoController extends Controller
             'descripcion' => ['required', 'min:5'],
             'precio' => ['required', 'numeric', 'gt:0'],
             'stock' => ['required', 'numeric'],
+            'imagen'=>['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ], [
             'nombre.required' => 'El nombre del producto es obligatorio para su muestra',
             'nombre.min' => 'El nombre del producto debe tener un minimo de :min caracteres',
@@ -96,6 +101,10 @@ class ProductoController extends Controller
             'precio.gt' => 'El precio del producto debe ser mayor a 0',
             'stock.required' => 'El stock del producto es obligatorio para su muestra',
             'stock.numeric' => 'El stock del producto debe de estar expresado en numeros',
+            'image.image' => 'El archivo debe de ser una imagen',
+            'image.mimes' => 'La imagen debe ser JPG, PNG o WEBP',
+            'image.max' => 'La imagen no puede pesar mas de 2 MB',
+
         ]);
         $producto = Producto::findOrFail($id);
         $imagenVieja = $producto->imagen;
@@ -106,9 +115,9 @@ class ProductoController extends Controller
         $producto->update($data);
         $producto->etiqueta()->sync($request->input('etiqueta_fks', []));
         if (
-            $request->hasFile('imagen') && $imagenVieja !== null && Storage::exists($imagenVieja)
+            $request->hasFile('imagen') && $imagenVieja !== null && Storage::disk('public')->exists($imagenVieja)
         ) {
-            Storage::delete($imagenVieja);
+            Storage::disk('public')->delete($imagenVieja);
         }
 
         return to_route('productos.index')

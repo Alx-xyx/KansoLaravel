@@ -531,6 +531,24 @@ footer {
     font-size: 13px;
 }
 
+.miniatura{
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid var(--kanso-linea);
+    border-radius: 2px;
+    display: block;
+}
+
+.table .btn {
+    white-space: nowrap;
+}
+
+.table td.celda-descripcion {
+    overflow-wrap: anywhere;
+    max-width: 320px;
+}
+
 @media (max-width: 600px) {
     .blog-article {
         padding: 20px 18px 56px;

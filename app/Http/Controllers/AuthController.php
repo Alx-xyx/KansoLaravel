@@ -13,7 +13,15 @@ class AuthController extends Controller
     }
 
     public function loginProcess(Request $request){
-        $credentials = $request->only(['email','password']);
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ],[
+            'email.required' => 'El email no puede estar vacio',
+            'email.email' => 'El email no tiene un formato valido',            
+            'password.required' => 'La contraseña no puede estar vacia',
+        ]);
+
         if(!Auth::attempt($credentials)){
             return to_route('auth.login.form')
             ->withInput()

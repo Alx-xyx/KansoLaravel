@@ -14,6 +14,6 @@ class ReservaProductoController extends Controller
         $producto = Producto::findOrFail($id);
         Mail::to(Auth::user())->send(new ReservaProductoRegistro($producto));
         return to_route('productos.index')
-         ->with('feedback.message', 'La pelicula'. $producto->nombre .'se reservo con exito');
+         ->with('feedback.message', 'El producto'. $producto->nombre .'se reservo con exito');
     }
 }

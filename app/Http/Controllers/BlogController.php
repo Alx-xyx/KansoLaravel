@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BlogController extends Controller
 {
@@ -32,14 +33,25 @@ class BlogController extends Controller
         $request->validate([
             'titulo'=>['required', 'min:2'],
             'contenido'=>['required'],
+            'imagen'=>['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'imagen_descripcion'=>['nullable', 'string', 'max:255'],
         ],[
             'titulo.required' => 'El titulo de la entrada no puede estar vacio',
-            'contenido.required' => 'La entrada debe de contar con contenido'
+            'titulo.min' => 'La entrada debe de tener al menos :min caracteres',
+            'contenido.required' => 'La entrada no puede estar vacia',
+            'image.image' => 'El archivo debe de ser una imagen',
+            'image.mimes' => 'La imagen debe ser JPG, PNG o WEBP',
+            'image.max' => 'La imagen no puede pesar mas de 2 MB',
+            'image.descripcion.max' => 'La descripcion de la imagen no puede superar los :max caracteres',
         ]);
 
-        $data = $request -> only(['titulo', 'contenido']);
+        $data = $request -> only(['titulo', 'contenido', 'imagen_descripcion']);
 
-        $entrada = Blog::create($data);
+        if ($request->hasFile('imagen')){
+            $data['imagen'] = $request->file('imagen')->store('blog', 'public');
+        }
+
+        Blog::create($data);
 
         return to_route('blog.index')
             ->with('feedback.message', 'La entrada fue añadida correctamente');
@@ -54,17 +66,31 @@ class BlogController extends Controller
     }
 
     public function update(Request $request, int $id){
-        $request->validate([
-        'titulo' => ['required','min:2'],
-        'contenido' => ['required']
-    ],[
-        'titulo.required' => 'El campo titulo no puede estar vacio',
-        'titulo.min' => 'El campo titulo debede tener al menos :min caracteres',
-        'contenido.required' => 'El campo sinopsis no puede estar vacio',
-    ]);
+    $request->validate([
+            'titulo'=>['required', 'min:2'],
+            'contenido'=>['required'],
+            'imagen'=>['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'imagen_descripcion'=>['nullable', 'string', 'max:255'],
+        ],[
+            'titulo.required' => 'El titulo de la entrada no puede estar vacio',
+            'titulo.min' => 'La entrada debe de tener al menos :min caracteres',
+            'contenido.required' => 'La entrada no puede estar vacia',
+            'image.image' => 'El archivo debe de ser una imagen',
+            'image.mimes' => 'La imagen debe ser JPG, PNG o WEBP',
+            'image.max' => 'La imagen no puede pesar mas de 2 MB',
+            'image.descripcion.max' => 'La descripcion de la imagen no puede superar los :max caracteres',
+        ]);
+
     $entrada = Blog::findOrFail($id);
-    $data = $request->only(['titulo', 'contenido']);
+    $imagenVieja = $entrada->imagen;
+    $data = $request->only(['titulo', 'contenido', 'imagen_descripcion']);
+    if($request->hasFile('imagen')){
+        $data['imagen'] = $request->file('imagen')->store('blog','public');
+    }
     $entrada->update($data);
+    if($request->hasFile('imagen') && $imagenVieja){
+        Storage::disk('public')->delete($imagenVieja);
+    }
     return to_route('blog.index')
         ->with('feedback.message', 'La pelicula '.$entrada->titulo.' se actualizo con exito');
     }
@@ -80,6 +106,9 @@ class BlogController extends Controller
     public function destroy(int $id){
         $entrada = Blog::findOrFail($id);
         $entrada->delete();
+        if($entrada->imagen){
+            Storage::disk('public')->delete($entrada->imagen);
+        }
         return to_route('blog.index')
             ->with('feedback.message', 'La entrada fue eliminada correctamente');
     }

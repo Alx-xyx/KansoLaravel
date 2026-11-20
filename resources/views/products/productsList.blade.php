@@ -24,7 +24,7 @@
             @foreach ($productos as $producto)    
             <tr>
                 <td> {{ $producto->nombre }} </td>
-                <td> {{ $producto->descripcion }} </td>
+                <td class="celda-descripcion"> {{ $producto->descripcion }} </td>
                 <td> ${{ number_format($producto->precio, 2, ',', '.') }} </td>
                 <td> {{ $producto->stock }} </td>
                 <td> {{ $producto->categoria->abreviacion }} </td>
@@ -35,9 +35,18 @@
                         <i>Sin etiquetas asignadas</i>                    
                     @endforelse
                 </td>
-                <td> {{ $producto->imagen }} </td>
                 <td>
-                    <div class="d-flex gap-2">
+                    @if ($producto->imagen)
+                        <img src="{{ \Storage::disk('public')->url($producto->imagen) }}" 
+                        alt="{{ $producto->imagen_descripcion ?: $producto->nombre }}"
+                        class="miniatura"
+                        >
+                    @else
+                        <span class="text-muted">Sin imagen</span>
+                    @endif
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-2">
                         <a href="{{ route('productos.show', ['producto' => $producto->producto_id]) }}" class="btn btn-primary">Ver mas</a>
                         @auth
                         <form action="{{ route('productos.reserva.registro', ['id' => $producto->producto_id]) }}" method="post" ">

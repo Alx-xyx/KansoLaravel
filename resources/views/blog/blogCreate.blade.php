@@ -8,7 +8,7 @@
         </div>
     @endif
 
-    <form action="{{ route('blog.store') }}" method="POST">
+    <form action="{{ route('blog.store') }}" method="POST" enctype="multipart/form-data" novalidate>
         <div class="mb-3">
             <label for="titulo" class="form-label">Titulo de la entrada</label>
             <input type="text" id="titulo" name="titulo" @class(['form-control', 'is-invalid' => $errors->has('titulo')])
@@ -48,6 +48,18 @@
                 <div class="text-danger" id="error-imagen">
                     {{ $message }}
                 </div>
+            @enderror
+        </div>
+        <div class="mb-3">
+            <label for="imagen_descripcion" class="form-label">Descripción de la imagen</label>
+            <input type="text" id="imagen_descripcion" name="imagen_descripcion" @class([
+                'form-control',
+                'is-invalid' => $errors->has('imagen_descripcion'),
+            ])
+                value="{{ old('imagen_descripcion') }}">
+            <div class="form-text">Texto que leen los lectores de pantalla y que se muestra si la imagen no carga.</div>
+            @error('imagen_descripcion')
+                <div class="text-danger" id="error-imagen_descripcion">{{ $message }}</div>
             @enderror
         </div>
         <button type="submit" class="btn btn-primary">Publicar</button>

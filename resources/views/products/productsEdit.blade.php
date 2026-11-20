@@ -93,9 +93,9 @@
             <div class="mb-2">
                 Imagen actual
             </div>
-            @if ($producto->imagen && \Storage::exists($producto->imagen))
+            @if ($producto->imagen && \Storage::disk('public')->exists($producto->imagen))
                 <div class="col-2">
-                    <img src="{{ \Storage::url($producto->imagen) }}" alt="" class="img-fluid">
+                    <img src="{{ \Storage::disk('public')->url($producto->imagen) }}" alt="" class="img-fluid">
                 </div>
             @else
                 Sin imagen actual

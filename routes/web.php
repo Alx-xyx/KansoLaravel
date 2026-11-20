@@ -85,3 +85,15 @@ Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])
     Route::get('/checkout', [\App\Http\Controllers\MercadoPagoController::class, 'show'])
         ->name('mp.show')
         ->middleware(['auth', 'admin']);
+    Route::get('/usuarios', [\App\Http\Controllers\Admin\UsuarioController::class, 'index'])
+        ->name('admin.usuarios.index')
+        ->middleware(['auth', 'admin']);
+    Route::get('/usuarios/{id}', [\App\Http\Controllers\Admin\UsuarioController::class, 'show'])
+        ->name('admin.usuarios.show')
+        ->middleware(['auth', 'admin']);
+    Route::get('/registro', [\App\Http\Controllers\RegistroController::class, 'form'])
+        ->name('auth.register.form')
+        ->middleware('guest');
+    Route::post('/registro', [\App\Http\Controllers\RegistroController::class, 'store'])
+        ->name('auth.register.process')
+        ->middleware('guest');

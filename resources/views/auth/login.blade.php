@@ -1,7 +1,7 @@
 <x-layouts.defaultComponent>
     <h1>Iniciar sesión</h1>
 
-    <form action="{{ route('auth.login.process') }}" method="POST">
+    <form action="{{ route('auth.login.process') }}" method="POST" novalidate>
         @csrf
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>
