@@ -24,8 +24,10 @@
                     <div class="d-flex gap-2">
                         <a href="{{ route('blog.show', ['id' => $entrada->blog_id]) }}" class="btn btn-primary">Ver mas</a>
                         @auth
+                        @if(auth()->user()?->esAdministrador())
                         <a href="{{ route('blog.edit', ['id' => $entrada->blog_id]) }}" class="btn btn-secondary">Editar</a>
                         <a href="{{ route('blog.delete', ['id' => $entrada->blog_id]) }}" class="btn btn-danger">Eliminar</a>
+                        @endif
                         @endauth
                     </div>
                 </td>

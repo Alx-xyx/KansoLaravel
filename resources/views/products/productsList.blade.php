@@ -43,8 +43,10 @@
                         <form action="{{ route('productos.reserva.registro', ['id' => $producto->producto_id]) }}" method="post" ">
                             <button type="submit" class="btn btn-warning">Reservar</button>
                         </form>
+                        @if(auth()->user()?->esAdministrador())
                         <a href="{{ route('productos.edit', ['id' => $producto->producto_id]) }}" class="btn btn-secondary">Editar</a>
                         <a href="{{ route('productos.delete', ['producto' => $producto->producto_id]) }}" class="btn btn-danger">Eliminar</a>
+                        @endif
                         @endauth
                     </div>
                 </td>

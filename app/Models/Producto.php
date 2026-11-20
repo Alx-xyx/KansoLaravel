@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Producto extends Model
 {
@@ -25,5 +26,9 @@ class Producto extends Model
             'producto_id',
             'etiqueta_id',
         );
+    }
+
+    public function compras(): HasMany{
+        return $this->hasMany(Compra::class, 'producto_fk', 'producto_id');
     }
 }

@@ -128,7 +128,14 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
 
+        if($producto->compras()->exists()){
+            return to_route('productos.index')
+                ->with('feedback.error', 'No se puede eliminar un producto con compras activas');
+        };
+
         try {
+            
+
             DB::transaction(function() use($producto){
                 $producto->etiqueta()->detach();
                 $producto->delete();

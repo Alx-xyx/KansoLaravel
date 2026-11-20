@@ -14,6 +14,13 @@ class UsuarioSeeder extends Seeder
         User::create([
             'email'=>'admin@kanso.com',
             'password'=>Hash::make('admin1234'),
+            'rol'=>User::ROL_ADMIN,
+        ]);
+
+        User::create([
+            'email'=>'usuario@kanso.com',
+            'password'=>Hash::make('usuario1234'),
+            'rol'=>User::ROL_USUARIO,
         ]);
     }
 }

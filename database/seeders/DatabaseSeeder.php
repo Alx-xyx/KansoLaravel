@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
             CategoriaSeeder::class,
             BlogSeeder::class,
             ProductoSeeder::class,
-            ProductosTienenEtiquetasSeeder::class
+            ProductosTienenEtiquetasSeeder::class,
+            CompraSeeder::class,
         ]);
     }
 }
