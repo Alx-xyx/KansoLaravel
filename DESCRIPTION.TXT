@@ -10,36 +10,50 @@ CONTENIDO
 
 01. Kanso es una marca que vende articulos de libreria japonesa como cuadernos, lapices y accesorios de escritura.
 El nombre proviene de la palabra japonesa 簡素 (Kanso), significando "Simplicidad" la cual es el norte de la identidad
-de marca como el diseño del sitio. 
+de marca como el diseño del sitio.
 
 Este sitio no solo muestra productos, ahora cuenta con un blog interno (siendo semejante a los blogs de Wordpress o
 Blogspot) donde se publican entradas sobre alguno de estos articulos, para contar su historia, usos y por que fueron elegidos.
 
-Tambien incluye un panel de administrador. Aquellos usuarios que esten validados podan crear, editar y eliminar entradas del
-blog y productos, mientras que los visitantes solo pueden consultar el contenido.
+El sitio se divide en dos partes:
+
+=> EL SITIO (para los usuarios comunes)
+    Muestra la home, los productos (con su categoria y sus etiquetas), el blog y permite registrarse, iniciar sesion
+    y reservar productos. Cada reserva se guarda como una compra del usuario y se le envia un mail de confirmacion.
+
+=> EL ADMIN (para los administradores)
+    Es un panel protegido por un Middleware propio que verifica el rol del usuario. Solo los administradores pueden
+    crear, editar y eliminar entradas del blog y productos, y consultar el listado de usuarios con el detalle de
+    las compras que realizo cada uno.
 
 02.
 | Tecnologia | Uso en el proyecto |
 | PHP 8.5 | Lenguaje del lado del Servidor |
-| Laravel 13 | Framework principal (maneja rutas, controllers, Eloquent, Blade y Auth) |
+| Laravel 13 | Framework principal (maneja rutas, controllers, Eloquent, Blade, Middlewares y Mail) |
 | MariaDB | Base de Datos Relacional (MySQL/MariaDB desde consola)  |
-| Eloquent ORM | Acceso a datos mediante Models |
+| Eloquent ORM | Acceso a datos mediante Models y sus relaciones |
 | Migrations & Seeders | Creacion de tablas y carga de datos de prueba |
 | Blade | Motor de plantillas y componente de layout |
 | Bootstrap | Grids, formularios, botones y tablas |
-| CSS | Hoja de estilos del proyecto |
+| CSS | Hoja de estilos propia del proyecto (public/css/style.css) |
+| Mailtrap | Bandeja de pruebas para ver los mails que envia el sitio |
+| Mercado Pago (API de Orders) | Generacion de ordenes de pago desde el checkout |
 | Composer | Gestor de dependencias de PHP |
 | Visual Studio Code | Editor de codigo |
 
 03.
 
 BASE DE DATOS
+Nombre: avendano_alvaro
 La base de datos se crea con Migrations y se completa con Seeders
 
-==> TABLA USUARIOS (Brinda acceso al administrador)
+==> TABLA USUARIOS (clientes y administradores)
     - usuario_id (PK)
     - email
     - password (guardada con hash)
+    - rol ("usuario" por defecto o "administrador")
+    - created_at
+    - updated_at
 
 ==> TABLA PRODUCTOS
     - producto_id (PK)
@@ -48,6 +62,36 @@ La base de datos se crea con Migrations y se completa con Seeders
     - precio
     - stock
     - imagen
+    - imagen_descripcion
+    - categoria_fk (FK -> categorias)
+    - created_at
+    - updated_at
+
+==> TABLA CATEGORIAS
+    - categoria_id (PK)
+    - nombre
+    - abreviacion
+    - created_at
+    - updated_at
+
+==> TABLA ETIQUETAS
+    - etiqueta_id (PK)
+    - nombre
+    - created_at
+    - updated_at
+
+==> TABLA PRODUCTOS_TIENEN_ETIQUETAS (tabla pivote, relacion muchos a muchos)
+    - producto_fk (FK -> productos)
+    - etiqueta_fk (FK -> etiquetas)
+    - clave primaria compuesta (producto_fk, etiqueta_fk)
+
+==> TABLA COMPRAS (compras o reservas de un usuario)
+    - compra_id (PK)
+    - usuario_fk (FK -> usuarios)
+    - producto_fk (FK -> productos)
+    - cantidad
+    - precio_unitario (precio al momento de la compra)
+    - estado
     - created_at
     - updated_at
 
@@ -56,78 +100,129 @@ La base de datos se crea con Migrations y se completa con Seeders
     - titulo
     - contenido
     - imagen
+    - imagen_descripcion
     - created_at
     - updated_at
+
+==> RELACIONES ENTRE TABLAS
+    - Una categoria tiene muchos productos (1:N)
+    - Un producto tiene muchas etiquetas y una etiqueta pertenece a muchos productos (N:M)
+    - Un usuario tiene muchas compras y un producto puede estar en muchas compras (1:N)
 
 ==> CARPETAS PRINCIPALES
 
 app/
-├── Http/Controllers/
-│   ├── AuthController.php       (login y logout)
-│   ├── BlogController.php       (ABM del blog)
-│   ├── HomeController.php       (inicio y nosotros)
-│   └── ProductoController.php   (ABM de productos)
+├── Http/
+│   ├── Controllers/
+│   │   ├── Admin/UsuarioController.php        (listado de usuarios y detalle con sus compras)
+│   │   ├── AuthController.php                 (login y logout)
+│   │   ├── RegistroController.php             (registro de usuarios)
+│   │   ├── BlogController.php                 (ABM del blog)
+│   │   ├── HomeController.php                 (inicio y nosotros)
+│   │   ├── ProductoController.php             (ABM de productos)
+│   │   ├── ReservaProductoController.php      (reserva de productos y envio de mail)
+│   │   ├── VerificacionEdadController.php     (confirmacion de edad)
+│   │   └── MercadoPagoController.php          (checkout con Mercado Pago)
+│   └── Middleware/
+│       ├── EsAdministrador.php                (verifica el rol de administrador)
+│       └── edad_minima_productos.php          (pide confirmar la edad en ciertos productos)
+├── Mail/
+│   └── ReservaProductoRegistro.php            (mail de confirmacion de reserva)
 └── Models/
     ├── Blog.php
+    ├── Categoria.php
+    ├── Compra.php
+    ├── Etiqueta.php
     ├── Producto.php
     └── User.php
 
+config/
+└── mercadoPago.php                            (credenciales leidas desde el .env)
+
 database/
-├── migrations/                  (usuarios, productos, blog)
+├── migrations/                  (usuarios, productos, blog, categorias, etiquetas, pivote, compras)
 └── seeders/
     ├── UsuarioSeeder.php
+    ├── CategoriaSeeder.php
+    ├── EtiquetaSeeder.php
     ├── ProductoSeeder.php
+    ├── ProductosTienenEtiquetasSeeder.php
+    ├── CompraSeeder.php
     ├── BlogSeeder.php
     └── DatabaseSeeder.php
 
 resources/views/
-├── auth/login.blade.php
+├── auth/                        (login y registro)
+├── admin/usuarios/              (listado de usuarios y detalle)
 ├── blog/                        (listado, alta, edición, baja, detalle)
-├── products/                    (listado, alta, edición, baja)
+├── products/                    (listado, detalle, alta, edición, baja, verificacion de edad, mail de reserva)
+├── mp/checkoutMp.blade.php      (checkout)
 ├── components/layouts/defaultComponent.blade.php
 ├── home.blade.php
 └── nosotros.blade.php
 
-routes/web.php                   (rutas públicas, login y panel admin)
-public/css/kanso.css             (estilos propios)
+routes/web.php                   (rutas publicas, de usuario y del panel admin)
+public/css/style.css             (estilos propios)
 
+==> RUTAS
 - Publicas: inicio, nosotros, listado de productos, detalle de producto, listado de blog y detalle
-de cada entradas
-- Autenticacion: formulario de login, procesamiento de login y cierre de sesion
+de cada entrada
+- Autenticacion: formulario de login, procesamiento de login, registro y cierre de sesion
+- Usuario con sesion: reserva de productos y checkout
+- Administrador (middleware auth + admin): ABM de blog, ABM de productos y consulta de usuarios
 
-! Las rutas tambien cuentan con ->name() y las vistas las invocan con route(), para que 
+! Las rutas tambien cuentan con ->name() y las vistas las invocan con route(), para que
 si una URL cambia no hay que modificar las vistas.
 
 04.
 
 => PARA CUALQUIER VISITANTE
     - Navegar por la pagina de inicio y la seccion "Nosotros"
-    - Ver el listado de productos y el detalle de cada uno
+    - Ver el listado de productos (con categoria, etiquetas e imagen) y el detalle de cada uno
     - Ver el listado de entradas del blog y leer cada una completa
+    - Registrarse como usuario nuevo
 
-=> PARA LOS ADMINISTRADORES
-    - Iniciar y cerrar sesion con email y contraseña (admin@kanso.com | admin1234). Una vez iniciada la sesion, el menu
-    muestra el email del usuario junto a la opcion para cerrar sesion
-    - Publicar nuevas entradas, editarlas y eliminarlas
-    - Dar de alta, editar y eliminar productos con la misma logica del blog
+=> PARA LOS USUARIOS CON SESION (rol "usuario")
+    - Iniciar y cerrar sesion con email y contraseña (usuario@kanso.com | usuario1234). Una vez iniciada la sesion,
+    el menu muestra el email del usuario junto a la opcion para cerrar sesion
+    - Reservar un producto: se guarda como una compra del usuario y recibe un mail de confirmacion
+    - No ve ni puede acceder a las opciones de administracion
+
+=> PARA LOS ADMINISTRADORES (rol "administrador")
+    - Iniciar sesion con (admin@kanso.com | admin1234)
+    - Publicar nuevas entradas del blog con imagen, editarlas (reemplazando la imagen) y eliminarlas
+    - Dar de alta, editar y eliminar productos con imagen, categoria y etiquetas
+    - Ver el listado de usuarios con la cantidad de compras de cada uno y entrar al detalle de cada usuario
+    para ver sus compras (producto, cantidad, precio, estado y fecha)
+    - No se puede eliminar un producto que ya tiene compras asociadas: se muestra un mensaje de error
 
 => ASPECTOS TECNICOS
-    - Validaciones en los formularios
-    - Mensajes de confirmacion
+    - Validaciones en los formularios, hechas en el servidor (los formularios usan novalidate) con mensajes
+    de error por campo
+    - Mensajes de feedback (exito y error) en el layout
+    - Roles de usuario: la columna "rol" de la tabla usuarios y el Middleware personalizado EsAdministrador,
+    registrado con el alias "admin", que redirige con un mensaje de error a quien no es administrador.
+    El rol nunca se toma del formulario de registro: todo usuario nuevo queda como "usuario".
     - Proteccion CSRF -> Esto no fue visto en clase por lo que se explica asi:
-                        Al tener errores en la validacion y navegacion al momento de iniciar sesion, encontre esta solucion 
+                        Al tener errores en la validacion y navegacion al momento de iniciar sesion, encontre esta solucion
                         el cual se llama @csrf haciendo referencia al "Cross Site Request Forgery".
-                        Cross-Site Request Forgery es un tipo de ataque donde una pagina hace que se se envien peticiones 
+                        Cross-Site Request Forgery es un tipo de ataque donde una pagina hace que se se envien peticiones
                         una vez que haya una sesion activa. Esto puede tranquilamente saturar la cantidad de peticiones
-                        que puede manejar un servidor por lo que Laravel tiene una manera de frenarlo. 
-                        Se genera un token aleatorio por sesion de manera secreta, se guarda dentro de la sesion y cuando 
+                        que puede manejar un servidor por lo que Laravel tiene una manera de frenarlo.
+                        Se genera un token aleatorio por sesion de manera secreta, se guarda dentro de la sesion y cuando
                         se recibe un formulario que tenga el @csrf dentro, un middleware va a comparar los tokens (siendo
                         el de la sesion actual y el que se mando). Si coinciden, te deja continuar y no pasa nada, caso contrario
                         se devuelve un Error 419 mostrando que la sesion termino. Esto solo se encuentra en los formularios de
                         metodo POST al ser datos que viajan, los GET no porque solo leen datos.
-    - Middleware auth y guest -> solo los usuarios con sesion acceden al panel de administacion 
-    y quienes ya iniciaron sesion no vuelven a ver el login
-    - Contraseñas cifradas con Hash 
+    - Middleware auth y guest -> solo los usuarios con sesion acceden a las rutas protegidas
+    y quienes ya iniciaron sesion no vuelven a ver el login ni el registro
+    - Contraseñas cifradas con Hash
+    - Subida de imagenes: se guardan en el disco "public" (storage/app/public) y, al reemplazarlas o eliminar
+    el registro, se borra el archivo anterior. Requiere ejecutar "php artisan storage:link"
+    - Transacciones (DB::transaction) al eliminar productos y al registrar una reserva
+    - Carga anticipada de relaciones (with / withCount) para evitar consultas repetidas
+    - Envio de mails con Mailable de Laravel (probado con Mailtrap)
+    - Credenciales de Mercado Pago y Mailtrap guardadas en el archivo .env, que no se sube al repositorio
     - Busqueda por ID usando findOrFail
 
 05.
@@ -135,11 +230,11 @@ El diseño toma inspiracion de Bungu, pero busca una identidad propia basada en 
 minimalismo japones.
 
 => PALETA DE COLORES
-    Fondo papel cálido: 
-        #f6f1e7 
-    Texto negro tinta: 
+    Fondo papel cálido:
+        #f6f1e7
+    Texto negro tinta:
         #1c1b19
-    Acento rojo sello (hanko): 
+    Acento rojo sello (hanko):
         #b3332d
 
 => TIPOGRAFIAS
@@ -147,26 +242,37 @@ minimalismo japones.
     Zen Kaku Gothic New para el texto general.
 
 => VISTAS DEL SITIO
-    - Layout general: barra de navegación con acceso a inicio, nosotros, productos y blog, 
-    más el acceso a sesión; área de mensajes de confirmación y pie de página.
+    - Layout general: barra de navegación con acceso a inicio, nosotros, productos y blog,
+    más el acceso a sesión y registro (y a "Usuarios" para los administradores); área de mensajes
+    de confirmación y pie de página.
     - Inicio y Nosotros: presentación de la marca.
-    - Listados de productos y de blog.
+    - Listados de productos y de blog (los productos con miniatura de la imagen).
     - Detalle de producto y de entrada del blog.
-    - Formularios de alta y edición, con campos precargados y mensajes de error por campo.
+    - Formularios de alta y edición, con campos precargados, imagen actual y mensajes de error por campo.
     - Pantallas de confirmación antes de eliminar.
-    - Login del administrador.
+    - Login y registro de usuarios.
+    - Panel de usuarios del administrador: listado y detalle con tabla de compras.
+    - Mail de confirmacion de reserva, con estilos propios en linea para que se vea bien en los clientes de correo.
+
+=> HTML SEMANTICO Y ACCESIBILIDAD
+    - Uso de article, section, header, footer, nav, figure, time, dl y tablas con caption y scope.
+    - Etiquetas label asociadas a cada campo, texto alternativo en las imagenes y atributos aria en los
+    campos con errores.
 
 06.
-    Kanso integra un sitio público de productos y blog con un panel de administración protegido, 
-    aplicando el patrón MVC de Laravel: modelos con Eloquent, controladores por recurso y vistas con Blade
+    Kanso integra un sitio publico de productos y blog con un panel de administración protegido por roles,
+    aplicando el patrón MVC de Laravel: modelos con Eloquent y sus relaciones, controladores por recurso,
+    middlewares propios y vistas con Blade.
 
-    Durante el desarrollo se trabajó con migrations y seeders para versionar la base de datos, 
-    rutas con nombre, validaciones, autenticación con sesión, protección CSRF y un diseño propio 
-    coherente con la idea de simplicidad que da nombre a la marca.
+    Durante el desarrollo se trabajó con migrations y seeders para versionar la base de datos,
+    rutas con nombre, validaciones del lado del servidor, autenticación y registro propios (sin el
+    scaffolding de Laravel), roles de usuario, subida de imagenes, envio de mails, una integracion
+    inicial con Mercado Pago y un diseño propio coherente con la idea de simplicidad que da nombre a la marca.
 
     ==> Posibles mejoras a futuro:
-        
-    - Subir y almacenar imágenes directamente desde los formularios.
+
     - Relacionar cada entrada del blog con el producto del que habla.
-    - Agregar carrito de compras y registro de clientes.
-    - Manejar mejor los nombres de las rutas y los nombres de los archivos
+    - Agregar un carrito de compras y completar el flujo de pago con Mercado Pago.
+    - Mover las validaciones a Form Requests y la logica de los controllers a clases de servicio.
+    - Documentar todas las clases con PHPDoc.
+    - Manejar mejor los nombres de las rutas y los nombres de los archivos (unificar espanol e ingles)

@@ -1,0 +1,172 @@
+<===== PROYECTO KANSO =====>
+
+CONTENIDO
+├── 01. INTRODUCCION
+├── 02. TECNOLOGIAS UTILIZADAS
+├── 03. ESTRUCTURA DEL PROYECTO
+├── 04. FUNCIONALIDADES DEL PROYECTO
+├── 05. VISTAS Y DISENO
+└── 06. CONCLUSION
+
+01. Kanso es una marca que vende articulos de libreria japonesa como cuadernos, lapices y accesorios de escritura.
+El nombre proviene de la palabra japonesa 簡素 (Kanso), significando "Simplicidad" la cual es el norte de la identidad
+de marca como el diseño del sitio. 
+
+Este sitio no solo muestra productos, ahora cuenta con un blog interno (siendo semejante a los blogs de Wordpress o
+Blogspot) donde se publican entradas sobre alguno de estos articulos, para contar su historia, usos y por que fueron elegidos.
+
+Tambien incluye un panel de administrador. Aquellos usuarios que esten validados podan crear, editar y eliminar entradas del
+blog y productos, mientras que los visitantes solo pueden consultar el contenido.
+
+02.
+| Tecnologia | Uso en el proyecto |
+| PHP 8.5 | Lenguaje del lado del Servidor |
+| Laravel 13 | Framework principal (maneja rutas, controllers, Eloquent, Blade y Auth) |
+| MariaDB | Base de Datos Relacional (MySQL/MariaDB desde consola)  |
+| Eloquent ORM | Acceso a datos mediante Models |
+| Migrations & Seeders | Creacion de tablas y carga de datos de prueba |
+| Blade | Motor de plantillas y componente de layout |
+| Bootstrap | Grids, formularios, botones y tablas |
+| CSS | Hoja de estilos del proyecto |
+| Composer | Gestor de dependencias de PHP |
+| Visual Studio Code | Editor de codigo |
+
+03.
+
+BASE DE DATOS
+La base de datos se crea con Migrations y se completa con Seeders
+
+==> TABLA USUARIOS (Brinda acceso al administrador)
+    - usuario_id (PK)
+    - email
+    - password (guardada con hash)
+
+==> TABLA PRODUCTOS
+    - producto_id (PK)
+    - nombre
+    - descripcion
+    - precio
+    - stock
+    - imagen
+    - created_at
+    - updated_at
+
+==> TABLA BLOG
+    - blog_id (PK)
+    - titulo
+    - contenido
+    - imagen
+    - created_at
+    - updated_at
+
+==> CARPETAS PRINCIPALES
+
+app/
+├── Http/Controllers/
+│   ├── AuthController.php       (login y logout)
+│   ├── BlogController.php       (ABM del blog)
+│   ├── HomeController.php       (inicio y nosotros)
+│   └── ProductoController.php   (ABM de productos)
+└── Models/
+    ├── Blog.php
+    ├── Producto.php
+    └── User.php
+
+database/
+├── migrations/                  (usuarios, productos, blog)
+└── seeders/
+    ├── UsuarioSeeder.php
+    ├── ProductoSeeder.php
+    ├── BlogSeeder.php
+    └── DatabaseSeeder.php
+
+resources/views/
+├── auth/login.blade.php
+├── blog/                        (listado, alta, edición, baja, detalle)
+├── products/                    (listado, alta, edición, baja)
+├── components/layouts/defaultComponent.blade.php
+├── home.blade.php
+└── nosotros.blade.php
+
+routes/web.php                   (rutas públicas, login y panel admin)
+public/css/kanso.css             (estilos propios)
+
+- Publicas: inicio, nosotros, listado de productos, detalle de producto, listado de blog y detalle
+de cada entradas
+- Autenticacion: formulario de login, procesamiento de login y cierre de sesion
+
+! Las rutas tambien cuentan con ->name() y las vistas las invocan con route(), para que 
+si una URL cambia no hay que modificar las vistas.
+
+04.
+
+=> PARA CUALQUIER VISITANTE
+    - Navegar por la pagina de inicio y la seccion "Nosotros"
+    - Ver el listado de productos y el detalle de cada uno
+    - Ver el listado de entradas del blog y leer cada una completa
+
+=> PARA LOS ADMINISTRADORES
+    - Iniciar y cerrar sesion con email y contraseña (admin@kanso.com | admin1234). Una vez iniciada la sesion, el menu
+    muestra el email del usuario junto a la opcion para cerrar sesion
+    - Publicar nuevas entradas, editarlas y eliminarlas
+    - Dar de alta, editar y eliminar productos con la misma logica del blog
+
+=> ASPECTOS TECNICOS
+    - Validaciones en los formularios
+    - Mensajes de confirmacion
+    - Proteccion CSRF -> Esto no fue visto en clase por lo que se explica asi:
+                        Al tener errores en la validacion y navegacion al momento de iniciar sesion, encontre esta solucion 
+                        el cual se llama @csrf haciendo referencia al "Cross Site Request Forgery".
+                        Cross-Site Request Forgery es un tipo de ataque donde una pagina hace que se se envien peticiones 
+                        una vez que haya una sesion activa. Esto puede tranquilamente saturar la cantidad de peticiones
+                        que puede manejar un servidor por lo que Laravel tiene una manera de frenarlo. 
+                        Se genera un token aleatorio por sesion de manera secreta, se guarda dentro de la sesion y cuando 
+                        se recibe un formulario que tenga el @csrf dentro, un middleware va a comparar los tokens (siendo
+                        el de la sesion actual y el que se mando). Si coinciden, te deja continuar y no pasa nada, caso contrario
+                        se devuelve un Error 419 mostrando que la sesion termino. Esto solo se encuentra en los formularios de
+                        metodo POST al ser datos que viajan, los GET no porque solo leen datos.
+    - Middleware auth y guest -> solo los usuarios con sesion acceden al panel de administacion 
+    y quienes ya iniciaron sesion no vuelven a ver el login
+    - Contraseñas cifradas con Hash 
+    - Busqueda por ID usando findOrFail
+
+05.
+El diseño toma inspiracion de Bungu, pero busca una identidad propia basada en el
+minimalismo japones.
+
+=> PALETA DE COLORES
+    Fondo papel cálido: 
+        #f6f1e7 
+    Texto negro tinta: 
+        #1c1b19
+    Acento rojo sello (hanko): 
+        #b3332d
+
+=> TIPOGRAFIAS
+    Shippori Mincho (serif japonesa) para títulos y logo.
+    Zen Kaku Gothic New para el texto general.
+
+=> VISTAS DEL SITIO
+    - Layout general: barra de navegación con acceso a inicio, nosotros, productos y blog, 
+    más el acceso a sesión; área de mensajes de confirmación y pie de página.
+    - Inicio y Nosotros: presentación de la marca.
+    - Listados de productos y de blog.
+    - Detalle de producto y de entrada del blog.
+    - Formularios de alta y edición, con campos precargados y mensajes de error por campo.
+    - Pantallas de confirmación antes de eliminar.
+    - Login del administrador.
+
+06.
+    Kanso integra un sitio público de productos y blog con un panel de administración protegido, 
+    aplicando el patrón MVC de Laravel: modelos con Eloquent, controladores por recurso y vistas con Blade
+
+    Durante el desarrollo se trabajó con migrations y seeders para versionar la base de datos, 
+    rutas con nombre, validaciones, autenticación con sesión, protección CSRF y un diseño propio 
+    coherente con la idea de simplicidad que da nombre a la marca.
+
+    ==> Posibles mejoras a futuro:
+        
+    - Subir y almacenar imágenes directamente desde los formularios.
+    - Relacionar cada entrada del blog con el producto del que habla.
+    - Agregar carrito de compras y registro de clientes.
+    - Manejar mejor los nombres de las rutas y los nombres de los archivos
