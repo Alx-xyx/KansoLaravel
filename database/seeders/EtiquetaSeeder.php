@@ -38,6 +38,12 @@ class EtiquetaSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'etiqueta_id' => 5,
+                'nombre' => 'Manejar cuidadosamente',
+                'created_at' => now(),
+                'updated_at' => now(),                
+            ]
         ]);
     }
 }

@@ -13,17 +13,15 @@ class ProductoController extends Controller
 {
     public function index()
     {
-        $productos = Producto::with(['categoria', 'etiqueta'])->get();
+        $productos = Producto::with(['categoria', 'etiqueta'])->paginate(3);
 
         return view('products.productsList', [
             'productos' => $productos,
         ]);
     }
 
-    public function show(int $id)
+    public function show(Producto $producto)
     {
-        $producto = Producto::findOrFail($id);
-
         return view('products.productsById', [
             'producto' => $producto,
         ]);
@@ -119,10 +117,10 @@ class ProductoController extends Controller
 
     // ! <================================ FUNCIONES PARA BORRAR ==================================================> !/
 
-    public function delete(int $id)
+    public function delete(Producto $producto)
     {
         return view('products.productsDelete', [
-            'producto' => Producto::findOrFail($id),
+            'producto' => $producto,
         ]);
     }
 
@@ -130,16 +128,24 @@ class ProductoController extends Controller
     {
         $producto = Producto::findOrFail($id);
 
-        DB::transaction(function() use($producto){
-            $producto->etiqueta()->detach();
-            $producto->delete();
-        });
-
-        if ($producto->imagen && Storage::disk('public')->exists($producto->imagen)) {
-            Storage::delete($producto->imagen);
+        try {
+            DB::transaction(function() use($producto){
+                $producto->etiqueta()->detach();
+                $producto->delete();
+            });
+    
+            if ($producto->imagen && Storage::disk('public')->exists($producto->imagen)) {
+                Storage::delete($producto->imagen);
+            }
+    
+            return to_route('productos.index')
+                ->with('feedback.message', 'El producto fue eliminado con exito');
+            
+            } catch (\Throwable $th) {
+            return to_route('productos.index')
+                ->with('feedback.message', 'Ocurrió un error y el producto no pudo ser eliminado');
+            
         }
 
-        return to_route('productos.index')
-            ->with('feedback.message', 'El producto fue eliminado con exito');
     }
 }

@@ -15,12 +15,12 @@ class AuthController extends Controller
     public function loginProcess(Request $request){
         $credentials = $request->only(['email','password']);
         if(!Auth::attempt($credentials)){
+            $request -> session()->regenerate();
             return to_route('auth.login.form')
                 ->withInput()
                 ->with('feedback.error', 'Las credenciales ingresadas no son correctas. Intente nuevamente');
         }
 
-        $request -> session()->regenerate();
 
         return to_route('blog.index')
             ->with('feedback.message', 'Sesion iniciada con exito');

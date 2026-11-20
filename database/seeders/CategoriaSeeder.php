@@ -42,6 +42,13 @@ class CategoriaSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now()
             ],
+            [
+                'categoria_id' => 5,
+                'nombre' => 'Cutters',
+                'abbreviation' => 'Cut',
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
         ]);
     }
 }

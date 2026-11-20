@@ -59,18 +59,28 @@ Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])
     Route::post('/productos/crear', [\App\Http\Controllers\ProductoController::class, 'store'])
         ->name('productos.store')
         ->middleware('auth');
-    Route::get('/productos/{id}', [\App\Http\Controllers\ProductoController::class, 'show'])
-        ->name('productos.show');
+    Route::get('/productos/{producto}', [\App\Http\Controllers\ProductoController::class, 'show'])
+        ->whereNumber('producto')
+        ->name('productos.show')
+        ->middleware(\App\Http\Middleware\edad_minima_productos::class);
+    Route::get('/productos/{id}/confirmar-edad', [\App\Http\Controllers\VerificacionEdadController::class, 'form'])
+        ->name('productos.verificacion-edad.form');
+    Route::post('/productos/{id}/confirmar-edad', [\App\Http\Controllers\VerificacionEdadController::class, 'confirm'])
+        ->name('productos.verificacion-edad.confirm');
+    Route::post('/productos/{id}/reservar', [\App\Http\Controllers\ReservaProductoController::class, 'register'])
+        ->name('productos.reserva.registro');
     Route::get('/productos/{id}/editar', [\App\Http\Controllers\ProductoController::class, 'edit'])
         ->name('productos.edit')
         ->middleware('auth');
     Route::post('/productos/{id}/editar', [\App\Http\Controllers\ProductoController::class, 'update'])
         ->name('productos.update')
         ->middleware('auth');
-    Route::get('/productos/{id}/eliminar', [\App\Http\Controllers\ProductoController::class, 'delete'])
+    Route::get('/productos/{producto}/eliminar', [\App\Http\Controllers\ProductoController::class, 'delete'])
         ->name('productos.delete')
         ->middleware('auth');
     Route::post('/productos/{id}/eliminar', [\App\Http\Controllers\ProductoController::class, 'destroy'])
         ->name('productos.destroy')
         ->middleware('auth');
-
+    Route::get('/checkout', [\App\Http\Controllers\MercadoPagoController::class, 'show'])
+        ->name('mp.show')
+        ->middleware('auth');

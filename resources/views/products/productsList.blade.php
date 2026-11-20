@@ -38,10 +38,13 @@
                 <td> {{ $producto->imagen }} </td>
                 <td>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('productos.show', ['id' => $producto->producto_id]) }}" class="btn btn-primary">Ver mas</a>
+                        <a href="{{ route('productos.show', ['producto' => $producto->producto_id]) }}" class="btn btn-primary">Ver mas</a>
                         @auth
+                        <form action="{{ route('productos.reserva.registro', ['id' => $producto->producto_id]) }}" method="post" ">
+                            <button type="submit" class="btn btn-warning">Reservar</button>
+                        </form>
                         <a href="{{ route('productos.edit', ['id' => $producto->producto_id]) }}" class="btn btn-secondary">Editar</a>
-                        <a href="{{ route('productos.delete', ['id' => $producto->producto_id]) }}" class="btn btn-danger">Eliminar</a>
+                        <a href="{{ route('productos.delete', ['producto' => $producto->producto_id]) }}" class="btn btn-danger">Eliminar</a>
                         @endauth
                     </div>
                 </td>
@@ -49,4 +52,6 @@
             @endforeach
         </tbody>
     </table>
+
+    {{ $productos->links() }}
 </x-layouts.defaultComponent>

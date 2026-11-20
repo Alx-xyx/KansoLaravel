@@ -9,6 +9,7 @@
     @endif
 
     <form action="{{ route('productos.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
         <div class="mb-3">
             <label for="nombre" class="form-label">Nombre del producto</label>
             <input type="text" id="nombre" name="nombre" @class(['form-control', 'is-invalid' => $errors->has('nombre')])
