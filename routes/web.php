@@ -68,7 +68,8 @@ Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])
     Route::post('/productos/{id}/confirmar-edad', [\App\Http\Controllers\VerificacionEdadController::class, 'confirm'])
         ->name('productos.verificacion-edad.confirm');
     Route::post('/productos/{id}/reservar', [\App\Http\Controllers\ReservaProductoController::class, 'register'])
-        ->name('productos.reserva.registro');
+        ->name('productos.reserva.registro')
+        ->middleware('auth');
     Route::get('/productos/{id}/editar', [\App\Http\Controllers\ProductoController::class, 'edit'])
         ->name('productos.edit')
         ->middleware('auth');
